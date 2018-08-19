@@ -1,5 +1,7 @@
 package sample;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -11,6 +13,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * @author ryo_c
+ *
+ */
 public class TimeSample {
 
 	public static void main(String[] args) {
@@ -21,8 +27,8 @@ public class TimeSample {
 		System.out.println(cal.getTime());
 
 		try {
-			Method3();
-		} catch (ParseException | ClassNotFoundException | SQLException e) {
+			Method3_InsertOracle();
+		} catch( Exception e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
@@ -264,7 +270,7 @@ public class TimeSample {
 	 * @throws SQLException
 	 * @throws ClassNotFoundException
 	 */
-	public static void Method3() throws ParseException, SQLException, ClassNotFoundException {
+	public static void Method3_InsertOracle() throws ParseException, SQLException, ClassNotFoundException {
 
 		//日付1
         String date1Str      = "20140102 01:02:04 005"; // 変換対象の日付文字列
@@ -320,7 +326,7 @@ public class TimeSample {
     		millis = remainSecondMillis;
     	}
 
-		System.out.println("Method1 終了");
+		System.out.println("Method3 途中");
 
         Connection conn = null;
 
@@ -328,44 +334,66 @@ public class TimeSample {
         String password = "osakada";
 
         PreparedStatement ps = null;
-        try {
+	    try {
 
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-            conn=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe",user,password);
+	            Class.forName("oracle.jdbc.driver.OracleDriver");
+	            conn=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe",user,password);
 
-//        	Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-//		    conn = DriverManager.getConnection(url, user, password);
+	//        	Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+	//		    conn = DriverManager.getConnection(url, user, password);
 
-	        Statement stmt = conn.createStatement();
-	        String sql = "INSERT INTO emp(emp_id, mp_name, update_dt,update_tm)  VALUES (?,?,sysDate,systimestamp)";
-            //実行するSQL文とパラメータを指定する"x);
-            String str = new SimpleDateFormat("yyyy-M-d").format(date1);
+		        Statement stmt = conn.createStatement();
+		        String sql = "INSERT INTO emp(emp_id, mp_name, update_dt,update_tm) " +
+		        	         "VALUES (?,?,?,?)";
+//OK		                      "VALUES (?,?,sysDate,systimestamp)";
+	            //実行するSQL文とパラメータを指定する"x);
+	            String str = new SimpleDateFormat("yyyy-M-d").format(date1);
 
-    //        java.sql.Date t1  = java.sql.Date.valueOf("2014-1-5");
-          //  java.sql.Date t1 = new java.sql.Date(1900,1,1);
-            java.sql.Date sqlDate = new java.sql.Date(Calendar.getInstance().getTimeInMillis());
-           java.sql.Date t1  = java.sql.Date.valueOf("2009-3-3");
-           ps = conn.prepareStatement(sql);
-            ps.setInt(1, 4);
-            ps.setString(2, "おいら");
-     //       int i = ps.executeUpdate();
+	    //        java.sql.Date t1  = java.sql.Date.valueOf("2014-1-5");
+	          //  java.sql.Date t1 = new java.sql.Date(1900,1,1);
+	            long curMillis = Calendar.getInstance().getTimeInMillis();
+	            java.sql.Date sqlDate = new java.sql.Date(curMillis);
+	            java.sql.Timestamp sqlTimeStamp =  new java.sql.Timestamp(curMillis);
+//	            java.sql.Date sqlDate1 = new java.sql.Date(date1);
+//	           java.sql.Date t1  = java.sql.Date.valueOf("2009-3-3");
+	            ps = conn.prepareStatement(sql);
+	            ps.setInt(1, 4);
+	            ps.setString(2, "おいら");
+	            ps.setDate(3, sqlDate);
+	            ps.setTimestamp(4, sqlTimeStamp);
 
-            //処理件数を表示する
-//            System.out.println("結果：" + i);
+	            ps.executeUpdate();
 
-            String sql2 = "select seq_01.nextval from dual";
-            int seqno = 0;
-            ResultSet rs2 = stmt.executeQuery(sql2);
-            if(rs2.next()) {
-               seqno = rs2.getInt("nextval");
-            }
-            System.out.println("SEQNO:" + String.valueOf(seqno));
+	            String sql2 = "select seq_01.nextval from dual";
+	            int seqno = 0;
+	            ResultSet rs2 = stmt.executeQuery(sql2);
+	            if(rs2.next()) {
+	               seqno = rs2.getInt("nextval");
+	            }
+	            System.out.println("SEQNO:" + String.valueOf(seqno));
 
 
-	} catch (SQLException | ClassNotFoundException e) {
-		// TODO 自動生成された catch ブロック
-		e.printStackTrace();
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
 	}
+
+	/**
+	 * @throws UnknownHostException
+	 *
+	 */
+	public static void Method4() throws UnknownHostException {
+
+        //オブジェクトを取得
+        InetAddress ia = InetAddress.getLocalHost();
+        String ip = ia.getHostAddress();       //IPアドレス
+        String hostname = ia.getHostName();    //ホスト名
+
+        //画面表示
+        System.out.println("IPアドレス：" + ip);
+        System.out.println("ホスト名：" + hostname);
 
 	}
 
