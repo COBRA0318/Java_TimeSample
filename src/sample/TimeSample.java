@@ -5,7 +5,6 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
@@ -27,7 +26,7 @@ public class TimeSample {
 		System.out.println(cal.getTime());
 
 		try {
-			Method3_InsertOracle();
+			Method5_InsertOracle2();
 		} catch( Exception e) {
 			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
@@ -339,12 +338,9 @@ public class TimeSample {
 	            Class.forName("oracle.jdbc.driver.OracleDriver");
 	            conn=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe",user,password);
 
-	//        	Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
-	//		    conn = DriverManager.getConnection(url, user, password);
-
 		        Statement stmt = conn.createStatement();
 		        String sql = "INSERT INTO emp(emp_id, mp_name, update_dt,update_tm) " +
-		        	         "VALUES (?,?,?,?)";
+		        	         "VALUES (seq_01.nextval,?,?,?)";
 //OK		                      "VALUES (?,?,sysDate,systimestamp)";
 	            //実行するSQL文とパラメータを指定する"x);
 	            String str = new SimpleDateFormat("yyyy-M-d").format(date1);
@@ -357,20 +353,21 @@ public class TimeSample {
 //	            java.sql.Date sqlDate1 = new java.sql.Date(date1);
 //	           java.sql.Date t1  = java.sql.Date.valueOf("2009-3-3");
 	            ps = conn.prepareStatement(sql);
-	            ps.setInt(1, 4);
-	            ps.setString(2, "おいら");
-	            ps.setDate(3, sqlDate);
-	            ps.setTimestamp(4, sqlTimeStamp);
+//順序からの取得に変更
+//	            ps.setInt(1, 4);
+	            ps.setString(1, "おいら");
+	            ps.setDate(2, sqlDate);
+	            ps.setTimestamp(3, sqlTimeStamp);
 
 	            ps.executeUpdate();
 
-	            String sql2 = "select seq_01.nextval from dual";
-	            int seqno = 0;
-	            ResultSet rs2 = stmt.executeQuery(sql2);
-	            if(rs2.next()) {
-	               seqno = rs2.getInt("nextval");
-	            }
-	            System.out.println("SEQNO:" + String.valueOf(seqno));
+//	            String sql2 = "select seq_01.nextval from dual";
+//	            int seqno = 0;
+//	            ResultSet rs2 = stmt.executeQuery(sql2);
+//	            if(rs2.next()) {
+//	               seqno = rs2.getInt("nextval");
+//	            }
+//	            System.out.println("SEQNO:" + String.valueOf(seqno));
 
 
 		} catch (SQLException | ClassNotFoundException e) {
@@ -395,6 +392,125 @@ public class TimeSample {
         System.out.println("IPアドレス：" + ip);
         System.out.println("ホスト名：" + hostname);
 
+	}
+
+	/**
+	 * @throws ParseException
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 */
+	public static void Method5_InsertOracle2() throws ParseException, SQLException, ClassNotFoundException {
+
+		//日付1
+        String date1Str      = "20140102 01:02:04 005"; // 変換対象の日付文字列
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss SSS");
+        Date date1 = sdf.parse(date1Str);
+
+        //日付2
+        //Date date2 = new GregorianCalendar(2016, 5 - 1, 2, 15, 0, 0,4).getTime();
+        Date date2 = sdf.parse("20160402 15:00:00 024");
+
+        //日付1出力
+        System.out.println(sdf.format(date1));
+        //日付2出力
+        System.out.println(sdf.format(date2));
+
+        //開始日時・終了日時のミリ数を取得
+        long startTime =date1.getTime();
+        long endTime = date2.getTime();
+
+        long spanTime = endTime  - startTime;
+
+        String SpanTimeStr = GetSpanTimeStr(spanTime);
+
+		System.out.println("Method5 途中");
+
+        Connection conn = null;
+
+        String user = "system";
+        String password = "osakada";
+
+        PreparedStatement ps = null;
+	    try {
+
+	            Class.forName("oracle.jdbc.driver.OracleDriver");
+	            conn=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:xe",user,password);
+
+		        Statement stmt = conn.createStatement();
+		        String sql = "INSERT INTO emp(emp_id, mp_name, update_dt,update_tm) " +
+		        	         "VALUES (seq_01.nextval,?,?,?)";
+//OK		                      "VALUES (?,?,sysDate,systimestamp)";
+	            //実行するSQL文とパラメータを指定する"x);
+	            String str = new SimpleDateFormat("yyyy-M-d").format(date1);
+
+	    //        java.sql.Date t1  = java.sql.Date.valueOf("2014-1-5");
+	          //  java.sql.Date t1 = new java.sql.Date(1900,1,1);
+	            long curMillis = Calendar.getInstance().getTimeInMillis();
+	            java.sql.Date sqlDate = new java.sql.Date(curMillis);
+	            java.sql.Timestamp sqlTimeStamp =  new java.sql.Timestamp(curMillis);
+//	            java.sql.Date sqlDate1 = new java.sql.Date(date1);
+//	           java.sql.Date t1  = java.sql.Date.valueOf("2009-3-3");
+	            ps = conn.prepareStatement(sql);
+//順序からの取得に変更
+//	            ps.setInt(1, 4);
+	            ps.setString(1, "おいら");
+	            ps.setDate(2, sqlDate);
+	            ps.setTimestamp(3, sqlTimeStamp);
+
+	            ps.executeUpdate();
+
+//	            String sql2 = "select seq_01.nextval from dual";
+//	            int seqno = 0;
+//	            ResultSet rs2 = stmt.executeQuery(sql2);
+//	            if(rs2.next()) {
+//	               seqno = rs2.getInt("nextval");
+//	            }
+//	            System.out.println("SEQNO:" + String.valueOf(seqno));
+
+
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+	}
+
+	public static String GetSpanTimeStr(long spanTimeMsec) {
+
+        long days;
+        long hours = 0;
+        long minutes = 0;
+        long seconds = 0;
+        long millSeconds = 0;
+
+        long modDayMSec  = 0;
+        long modHourMSec = 0;
+        long modMinuteMSec = 0;
+        long modSecondMSec = 0;
+
+        days = spanTimeMsec / 86400000 ;
+        System.out.println(days);
+
+        modDayMSec =spanTimeMsec % 86400000;
+
+        if(modDayMSec > 0) {
+            hours = modDayMSec / 3600000;
+            modHourMSec = modDayMSec % 3600000;	//時間
+        }
+
+        if(modHourMSec > 0) {
+        	minutes = modHourMSec /  60000;
+        	modMinuteMSec = modHourMSec % 60000;
+        }
+
+    	if(modMinuteMSec > 0) {
+    		seconds = modMinuteMSec / 1000;
+    		modSecondMSec = modMinuteMSec % 1000;
+    		millSeconds = modSecondMSec;
+    	}
+
+    	String spanStr = String.format("%d日%d時間%d分%d秒%dミリ秒",days,hours,minutes,seconds,millSeconds);
+    	return spanStr;
 	}
 
 }
